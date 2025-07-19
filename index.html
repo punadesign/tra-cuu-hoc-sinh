@@ -108,7 +108,7 @@
         ].map(v => `<td>${v ?? ''}</td>`).join('');
 
         const qrHtml = s['THANH TOÁN']
-          ? `<div class="qr-wrapper">QR:<br><img src="${s['THANH TOÁN']}" alt="QR"></div>`
+          ? `<div class="qr-wrapper">Quét QR Để Thanh Toán:<br><img src="${s['THANH TOÁN']}" alt="QR"></div>`
           : '';
 
         const qrCell = `<td>${qrHtml}</td>`;
