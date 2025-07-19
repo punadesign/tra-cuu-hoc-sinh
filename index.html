@@ -5,16 +5,41 @@
   <title>Tra cứu học phí học sinh</title>
   <style>
     body { font-family: Arial; max-width: 1000px; margin: auto; padding: 20px; }
-    input { width: 100%; padding: 10px; font-size: 16px; margin-top: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background: #f2f2f2; }
-    img { max-width: 120px; }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    input {
+      width: 70%;
+    }
+    button {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #f2f2f2;
+    }
+    img {
+      max-width: 120px;
+    }
   </style>
 </head>
 <body>
   <h2>Tra cứu học phí học sinh</h2>
-  <input type="text" id="searchInput" placeholder="Nhập ID hoặc tên học sinh..." oninput="searchStudent()">
+  <input type="text" id="searchInput" placeholder="Nhập ID hoặc tên học sinh...">
+  <button onclick="searchStudent()">Tìm kiếm</button>
+
   <table id="resultTable" style="display: none;">
     <thead><tr>
       <th>HỌ VÀ TÊN</th><th>LỚP</th><th>MÔN</th><th>ID</th>
@@ -25,7 +50,7 @@
   </table>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxSUuImgtlJSoYs2CCZe40ny-z11EhEWShU3i46n_mxIhMjS18qD3rM4iucNMQGBfkE/exec"; // <--- Dán link API của bạn vào đây
+    const API_URL = "https://script.google.com/macros/s/AKfycbxSUuImgtlJSoYs2CCZe40ny-z11EhEWShU3i46n_mxIhMjS18qD3rM4iucNMQGBfkE/exec"; // API của bạn
     let students = [];
 
     function removeAccents(str) {
@@ -39,6 +64,11 @@
 
     async function searchStudent() {
       const input = document.getElementById("searchInput").value.trim();
+      if (!input) {
+        alert("Vui lòng nhập tên hoặc ID học sinh");
+        return;
+      }
+
       if (students.length === 0) await fetchData();
 
       const tbody = document.getElementById("resultBody");
@@ -51,6 +81,7 @@
 
       if (filtered.length === 0) {
         document.getElementById("resultTable").style.display = "none";
+        alert("Không tìm thấy học sinh.");
         return;
       }
 
