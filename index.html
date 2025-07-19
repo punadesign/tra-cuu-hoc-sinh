@@ -5,17 +5,22 @@
   <title>Tra cứu học phí học sinh</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       max-width: 1000px;
       margin: auto;
       padding: 20px;
     }
-    input {
-      width: 100%;
+    input, button {
       padding: 10px;
       font-size: 16px;
       margin-top: 10px;
-      box-sizing: border-box;
+    }
+    input {
+      width: 70%;
+    }
+    button {
+      margin-left: 10px;
+      cursor: pointer;
     }
     table {
       width: 100%;
@@ -31,26 +36,28 @@
     th {
       background: #f2f2f2;
     }
-    img.qr {
-      max-width: 180px;
-      height: auto;
-      display: block;
-      margin: 10px auto;
+    .qr-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qr-wrapper img {
+      max-width: 240px;
+      margin-top: 6px;
     }
   </style>
 </head>
 <body>
   <h2>Tra cứu học phí học sinh</h2>
-  <input type="text" id="searchInput" placeholder="Nhập ID hoặc tên học sinh..." oninput="searchStudent()">
+  <input type="text" id="searchInput" placeholder="Nhập ID hoặc tên học sinh...">
+  <button onclick="searchStudent()">Tìm kiếm</button>
 
   <table id="resultTable" style="display: none;">
-    <thead>
-      <tr>
-        <th>HỌ VÀ TÊN</th><th>LỚP</th><th>MÔN</th><th>ID</th>
-        <th>THÁNG CŨ</th><th>HP THÁNG MỚI</th><th>SÁCH BÀI TẬP</th>
-        <th>GIẢM</th><th>CỘNG</th><th>ĐÃ NỘP</th><th>CÒN</th><th>THANH TOÁN</th>
-      </tr>
-    </thead>
+    <thead><tr>
+      <th>HỌ VÀ TÊN</th><th>LỚP</th><th>MÔN</th><th>ID</th>
+      <th>THÁNG CŨ</th><th>HP THÁNG MỚI</th><th>SÁCH BÀI TẬP</th>
+      <th>GIẢM</th><th>CỘNG</th><th>ĐÃ NỘP</th><th>CÒN</th><th>THANH TOÁN</th>
+    </tr></thead>
     <tbody id="resultBody"></tbody>
   </table>
 
@@ -69,6 +76,11 @@
 
     async function searchStudent() {
       const input = document.getElementById("searchInput").value.trim();
+      if (!input) {
+        alert("Vui lòng nhập tên hoặc ID học sinh");
+        return;
+      }
+
       if (students.length === 0) await fetchData();
 
       const tbody = document.getElementById("resultBody");
@@ -81,6 +93,7 @@
 
       if (filtered.length === 0) {
         document.getElementById("resultTable").style.display = "none";
+        alert("Không tìm thấy học sinh.");
         return;
       }
 
@@ -94,8 +107,12 @@
           s['SÁCH BÀI TẬP'], s['GIẢM'], s['CỘNG'], s['ĐÃ NỘP'], s['CÒN']
         ].map(v => `<td>${v ?? ''}</td>`).join('');
 
-        const imgCell = `<td>${s['THANH TOÁN'] ? `<img src="${s['THANH TOÁN']}" alt="QR Code" class="qr">` : ''}</td>`;
-        row.innerHTML = cells + imgCell;
+        const qrHtml = s['THANH TOÁN']
+          ? `<div class="qr-wrapper">QR:<br><img src="${s['THANH TOÁN']}" alt="QR"></div>`
+          : '';
+
+        const qrCell = `<td>${qrHtml}</td>`;
+        row.innerHTML = cells + qrCell;
         tbody.appendChild(row);
       });
     }
