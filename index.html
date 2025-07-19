@@ -1,95 +1,60 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #fdfdfd;
-  }
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tra cứu học sinh</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input { padding: 8px; font-size: 16px; width: 300px; }
+    button { padding: 8px 16px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    img { max-width: 160px; }
+    a { color: #0073aa; }
+  </style>
+</head>
+<body>
+  <h2>Tra cứu thông tin học sinh</h2>
+  <input type="text" id="searchInput" placeholder="Nhập ID hoặc Tên học sinh">
+  <button onclick="searchData()">Tìm kiếm</button>
+  <div id="tableContainer"></div>
 
-  input {
-    padding: 8px 12px;
-    font-size: 16px;
-    width: 300px;
-    margin-right: 10px;
-  }
+  <script>
+    function searchData() {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const url = "https://script.google.com/macros/s/AKfycbwvzUbOo9zBEkKkuwjXIlqlJ6jz9qiCIt-AVp9YFs6uJCMs2wBGBZsFicjNtbzffp6g/exec?keyword=" + encodeURIComponent(keyword);
 
-  button {
-    padding: 8px 16px;
-    font-size: 16px;
-    background-color: #0073aa;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background-color: #005f8d;
-  }
-
-  table {
-    width: 100%;
-    max-width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 16px;
-  }
-
-  th, td {
-    border: 1px solid #ccc;
-    padding: 14px 10px;
-    text-align: center;
-    word-break: break-word;
-  }
-
-  th {
-    background-color: #f0f0f0;
-    font-weight: bold;
-  }
-
-  img {
-    max-width: 160px;
-    height: auto;
-  }
-</style>
-
-  </head>
-  <body>
-    <h2>🔍 Tra cứu học phí học sinh</h2>
-    <input type="text" id="keyword" placeholder="Nhập họ tên hoặc ID">
-    <button onclick="search()">Tìm</button>
-    <div id="result"></div>
-
-    <script>
-      function search() {
-        const keyword = document.getElementById("keyword").value;
-        google.script.run.withSuccessHandler(function(results) {
-          if (results.length === 0) {
-            document.getElementById("result").innerHTML = "<p>Không tìm thấy học sinh phù hợp.</p>";
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (!data || data.length === 0) {
+            document.getElementById("tableContainer").innerHTML = "<p>Không tìm thấy học sinh</p>";
             return;
           }
 
-          let html = '<table><tr><th>STT</th><th>Họ tên</th><th>Lớp</th><th>Môn</th><th>ID</th><th>Còn phải đóng</th><th>QR Thanh toán</th></tr>';
-          results.forEach(row => {
-            const soTienConLai = row[11];   // Cột "CÒN"
-            const qrLink = row[12];         // Cột "THANH TOÁN"
-            html += `<tr>
-              <td>${row[0]}</td>
-              <td>${row[1]}</td>
-              <td>${row[2]}</td>
-              <td>${row[3]}</td>
-              <td>${row[4]}</td>
-              <td>${soTienConLai}</td>
-              <td><img src="${qrLink}" alt="QR Thanh toán"/></td>
-            </tr>`;
+          let table = "<table><thead><tr>";
+          const headers = ["STT", "Họ tên", "Lớp", "Trường", "Mã ID", "QR"];
+          headers.forEach(h => table += `<th>${h}</th>`);
+          table += "</tr></thead><tbody>";
+
+          data.forEach(row => {
+            table += "<tr>";
+            row.forEach((cell, index) => {
+              if (index === 13 && cell.includes("http")) {
+                const img = `<img src="${cell}" alt="QR">`;
+                const link = `<a href="${cell}" target="_blank">Bấm vào đây</a>`;
+                table += `<td>${img}<br>${link}</td>`;
+              } else {
+                table += `<td>${cell}</td>`;
+              }
+            });
+            table += "</tr>";
           });
-          html += "</table>";
-          document.getElementById("result").innerHTML = html;
-        }).searchStudent(keyword);
-      }
-    </script>
-  </body>
+
+          table += "</tbody></table>";
+          document.getElementById("tableContainer").innerHTML = table;
+        });
+    }
+  </script>
+</body>
 </html>
