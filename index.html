@@ -1,59 +1,67 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Tra cứu học sinh</title>
+  <meta charset="UTF-8" />
+  <title>Tra cứu học phí</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input { padding: 8px; font-size: 16px; width: 300px; }
-    button { padding: 8px 16px; }
-    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-    img { max-width: 160px; }
-    a { color: #0073aa; }
+    body { font-family: Arial; max-width: 1000px; margin: auto; padding: 20px; }
+    input { width: 100%; padding: 10px; font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #f2f2f2; }
+    img { max-width: 120px; }
   </style>
 </head>
 <body>
-  <h2>Tra cứu thông tin học sinh</h2>
-  <input type="text" id="searchInput" placeholder="Nhập ID hoặc Tên học sinh">
-  <button onclick="searchData()">Tìm kiếm</button>
-  <div id="tableContainer"></div>
+  <h2>Tra cứu học phí học sinh</h2>
+  <input type="text" id="searchInput" placeholder="Nhập ID hoặc tên học sinh..." oninput="searchStudent()">
+  <table id="resultTable" style="display: none;">
+    <thead><tr>
+        <th>Họ và tên</th><th>Lớp</th><th>Môn</th><th>ID</th>
+        <th>Tháng 6 chuyển sang</th><th>Học phí tháng 7+8</th><th>Sách bài tập</th>
+        <th>Giảm</th><th>Cộng</th><th>Đã nộp</th><th>Còn</th><th>Thanh toán</th>
+    </tr></thead>
+    <tbody id="resultBody"></tbody>
+  </table>
 
   <script>
-    function searchData() {
-      const keyword = document.getElementById("searchInput").value.trim();
-      const url = "https://script.google.com/macros/s/AKfycbwvzUbOo9zBEkKkuwjXIlqlJ6jz9qiCIt-AVp9YFs6uJCMs2wBGBZsFicjNtbzffp6g/exec?keyword=" + encodeURIComponent(keyword);
+    const API_URL = "https://script.google.com/macros/s/AKfycbyEgxdBXyektYKEKYNgsFm7bVtwQnNrkYoN0v9JvisHCkeqaUl5mM0zRoneJzs8Oygh/exec"; // dán URL bạn vừa copy
+    let students = [];
 
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (!data || data.length === 0) {
-            document.getElementById("tableContainer").innerHTML = "<p>Không tìm thấy học sinh</p>";
-            return;
-          }
+    async function fetchData() {
+      const res = await fetch(API_URL);
+      students = await res.json();
+    }
 
-          let table = "<table><thead><tr>";
-          const headers = ["STT", "Họ tên", "Lớp", "Trường", "Mã ID", "QR"];
-          headers.forEach(h => table += `<th>${h}</th>`);
-          table += "</tr></thead><tbody>";
-
-          data.forEach(row => {
-            table += "<tr>";
-            row.forEach((cell, index) => {
-              if (index === 13 && cell.includes("http")) {
-                const img = `<img src="${cell}" alt="QR">`;
-                const link = `<a href="${cell}" target="_blank">Bấm vào đây</a>`;
-                table += `<td>${img}<br>${link}</td>`;
-              } else {
-                table += `<td>${cell}</td>`;
-              }
-            });
-            table += "</tr>";
-          });
-
-          table += "</tbody></table>";
-          document.getElementById("tableContainer").innerHTML = table;
-        });
+    async function searchStudent() {
+      if (students.length === 0) await fetchData();
+      const input = document.getElementById("searchInput").value.toLowerCase().trim();
+      const tbody = document.getElementById("resultBody");
+      tbody.innerHTML = "";
+      if (!input) {
+        document.getElementById("resultTable").style.display = "none";
+        return;
+      }
+      const filtered = students.filter(s =>
+        (s['HỌ VÀ TÊN'] || '').toString().toLowerCase().includes(input) ||
+        (s['ID'] || '').toString().toLowerCase().includes(input)
+      );
+      if (filtered.length === 0) {
+        document.getElementById("resultTable").style.display = "none";
+        return;
+      }
+      document.getElementById("resultTable").style.display = "table";
+      filtered.forEach(s => {
+        const row = document.createElement("tr");
+        const cols = [
+          s['HỌ VÀ TÊN'], s['Lớp'], s['Môn'], s['ID'],
+          s['Tháng 6 chuyển sang'], s['Học phí tháng 7+8'],
+          s['Sách bài tập'], s['Giảm'], s['Cộng'], s['Đã nộp'], s['Còn']
+        ].map(val => `<td>${val ?? ''}</td>`).join('');
+        const img = `<td>${ s['THANH TOÁN'] ? `<img src="${s['THANH TOÁN']}" alt="QR thanh toán">` : '' }</td>`;
+        row.innerHTML = cols + img;
+        tbody.appendChild(row);
+      });
     }
   </script>
 </body>
