@@ -59,9 +59,9 @@
       filtered.forEach(s => {
         const row = document.createElement("tr");
         const cells = [
-          s['HỌ VÀ TÊN'], s['Lớp'], s['Môn'], s['ID'],
-          s['Tháng 6 chuyển sang'], s['Học phí tháng 7+8'],
-          s['Sách bài tập'], s['Giảm'], s['Cộng'], s['Đã nộp'], s['Còn']
+          s['HỌ VÀ TÊN'], s['LỚP'], s['MÔN'], s['ID'],
+          s['THÁNG CŨ'], s['HP THÁNG MỚI'],
+          s['SÁCH BÀI TẬP'], s['GIẢM'], s['CỘNG'], s['ĐÃ NỘP'], s['CÒN']
         ].map(v => `<td>${v ?? ''}</td>`).join('');
         const img = `<td>${ s['THANH TOÁN'] ? `<img src="${s['THANH TOÁN']}" alt="QR">` : '' }</td>`;
         row.innerHTML = cells + img;
