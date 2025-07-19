@@ -1,0 +1,22 @@
+function doGet(e) {
+  return HtmlService.createHtmlOutputFromFile('Index');
+}
+
+function searchStudent(keyword) {
+  const ss = SpreadsheetApp.openById("19YcjLwRL36Ta9ZGfgEaq8fYnra6IgFUEChMmwxeAv-8");
+  const sheet = ss.getSheetByName("DATAHOCSINH"); // Đổi nếu tên khác
+  const data = sheet.getDataRange().getValues();
+  let results = [];
+
+  if (!keyword) return [];
+
+  for (let i = 1; i < data.length; i++) {
+    const name = data[i][1].toLowerCase();
+    const id = data[i][4].toLowerCase();
+    if (name.includes(keyword.toLowerCase()) || id.includes(keyword.toLowerCase())) {
+      results.push(data[i]);
+    }
+  }
+
+  return results;
+}
