@@ -2,10 +2,10 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Tra cứu học phí</title>
+  <title>Tra cứu học phí học sinh</title>
   <style>
     body { font-family: Arial; max-width: 1000px; margin: auto; padding: 20px; }
-    input { width: 100%; padding: 10px; font-size: 16px; }
+    input { width: 100%; padding: 10px; font-size: 16px; margin-top: 10px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     th { background: #f2f2f2; }
@@ -17,16 +17,20 @@
   <input type="text" id="searchInput" placeholder="Nhập ID hoặc tên học sinh..." oninput="searchStudent()">
   <table id="resultTable" style="display: none;">
     <thead><tr>
-        <th>Họ và tên</th><th>Lớp</th><th>Môn</th><th>ID</th>
-        <th>Tháng 6 chuyển sang</th><th>Học phí tháng 7+8</th><th>Sách bài tập</th>
-        <th>Giảm</th><th>Cộng</th><th>Đã nộp</th><th>Còn</th><th>Thanh toán</th>
+      <th>HỌ VÀ TÊN</th><th>LỚP</th><th>MÔN</th><th>ID</th>
+      <th>THÁNG CŨ</th><th>HP THÁNG MỚI</th><th>SÁCH BÀI TẬP</th>
+      <th>GIẢM</th><th>CỘNG</th><th>ĐÃ NỘP</th><th>CÒN</th><th>THANH TOÁN</th>
     </tr></thead>
     <tbody id="resultBody"></tbody>
   </table>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyEgxdBXyektYKEKYNgsFm7bVtwQnNrkYoN0v9JvisHCkeqaUl5mM0zRoneJzs8Oygh/exec"; // dán URL bạn vừa copy
+    const API_URL = "https://script.google.com/macros/s/AKfycbzvmNRbYaooVg86N-jBmQZxf-TZ8D_MUazQhwU--vOMo3TuMi-NVEy-DxGGtFOjzhAo/exec"; // <--- Dán link API của bạn vào đây
     let students = [];
+
+    function removeAccents(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
 
     async function fetchData() {
       const res = await fetch(API_URL);
@@ -34,32 +38,33 @@
     }
 
     async function searchStudent() {
+      const input = document.getElementById("searchInput").value.trim();
       if (students.length === 0) await fetchData();
-      const input = document.getElementById("searchInput").value.toLowerCase().trim();
+
       const tbody = document.getElementById("resultBody");
       tbody.innerHTML = "";
-      if (!input) {
-        document.getElementById("resultTable").style.display = "none";
-        return;
-      }
+
       const filtered = students.filter(s =>
-        (s['HỌ VÀ TÊN'] || '').toString().toLowerCase().includes(input) ||
-        (s['ID'] || '').toString().toLowerCase().includes(input)
+        removeAccents(s['HỌ VÀ TÊN'] || '').includes(removeAccents(input)) ||
+        (s['ID'] || '').toLowerCase().includes(input.toLowerCase())
       );
+
       if (filtered.length === 0) {
         document.getElementById("resultTable").style.display = "none";
         return;
       }
+
       document.getElementById("resultTable").style.display = "table";
+
       filtered.forEach(s => {
         const row = document.createElement("tr");
-        const cols = [
+        const cells = [
           s['HỌ VÀ TÊN'], s['Lớp'], s['Môn'], s['ID'],
           s['Tháng 6 chuyển sang'], s['Học phí tháng 7+8'],
           s['Sách bài tập'], s['Giảm'], s['Cộng'], s['Đã nộp'], s['Còn']
-        ].map(val => `<td>${val ?? ''}</td>`).join('');
-        const img = `<td>${ s['THANH TOÁN'] ? `<img src="${s['THANH TOÁN']}" alt="QR thanh toán">` : '' }</td>`;
-        row.innerHTML = cols + img;
+        ].map(v => `<td>${v ?? ''}</td>`).join('');
+        const img = `<td>${ s['THANH TOÁN'] ? `<img src="${s['THANH TOÁN']}" alt="QR">` : '' }</td>`;
+        row.innerHTML = cells + img;
         tbody.appendChild(row);
       });
     }
